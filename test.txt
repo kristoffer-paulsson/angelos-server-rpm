@@ -1,0 +1,91 @@
+# find /opt/angelos/ | grep -v "__pycache__" |grep -v "test_" > files.txt
+# Find all files and directories:
+find /opt/angelos -type f -print0 | grep "test_" > files.txt
+find /opt/angelos -type d -print0 | grep "test_" > directories.txt
+while read in; do chown angelos:angelos "$in"; done < files.txt
+while read in; do chown angelos: angelos "$in"; done < directories.txt
+while read in; do chmod 400 "$in"; done < files.txt
+while read in; do chmod 444 "$in"; done < directories.txt
+chmod 500 /opt/angelos/bin/angelos
+# Make all files and directories angelos:angelos
+find /opt/angelos -print0 | xargs -0 -I '{}' -n 1 chown angelos:angelos '{}'
+# Make all files 400
+find /opt/angelos -type f -print0 | xargs -0 -I '{}' -n 1 chmod 400 '{}'
+# find /opt/angelos -print0 | grep "test_" | xargs -0 -I '{}' -n 1 rm '{}'
+find /opt/angelos -print0 | grep -v "test_" | xargs -0 -I '{}' -n 1 myWrapper -arg1 -file='{}'
+find /opt/angelos -type f -print0 | grep -v "test_" | xargs -0 -I '{}' -n 1 myWrapper -arg1 -file='{}'
+
+
+# List all file that are not filtered out
+find /opt/angelos -type f | \
+grep -v "/test/" | \
+grep -v "/tests/" | \
+grep -v "/unittest/" | \
+grep -v "/test_" | \
+grep -v "/distutils/" | \
+grep -v "/angelos/meta/" | \
+grep -v "/tkinter/" | \
+grep -v "/turtledemo/" | \
+grep -v "/idlelib/" | \
+grep -v "/ensurepip/" | \
+grep -v "/lib2to3/" | \
+grep -v "/venv/" > \
+../../../data/files.txt
+
+# List all directories that are not filtered out
+find /opt/angelos -type d | \
+grep -v "/test/" | \
+grep -v "/tests/" | \
+grep -v "/unittest/" | \
+grep -v "/test_" | \
+grep -v "/distutils/" | \
+grep -v "/angelos/meta/" | \
+grep -v "/tkinter/" | \
+grep -v "/turtledemo/" | \
+grep -v "/idlelib/" | \
+grep -v "/ensurepip/" | \
+grep -v "/lib2to3/" | \
+grep -v "/venv/" > \
+../../../data/directories.txt
+
+
+# Delete all unecessary files
+find /opt/angelos -type f | \
+grep -v "/test/" | \
+grep -v "/tests/" | \
+grep -v "/unittest/" | \
+grep -v "/test_" | \
+grep -v "/distutils/" | \
+grep -v "/angelos/meta/" | \
+grep -v "/tkinter/" | \
+grep -v "/turtledemo/" | \
+grep -v "/idlelib/" | \
+grep -v "/ensurepip/" | \
+grep -v "/lib2to3/" | \
+grep -v "/venv/" | \
+xargs -0 -I '{}' -n 1 rm '{}'
+
+# Delete all unecessary directories
+find /opt/angelos -type d | \
+grep "/test/" | \
+grep -v "/tests/" | \
+grep -v "/unittest/" | \
+grep -v "/test_" | \
+grep -v "/distutils/" | \
+grep -v "/angelos/meta/" | \
+grep -v "/tkinter/" | \
+grep -v "/turtledemo/" | \
+grep -v "/idlelib/" | \
+grep -v "/ensurepip/" | \
+grep -v "/lib2to3/" | \
+grep -v "/venv/" | \
+xargs -0 -I '{}' -n 1 rmdir '{}'
+
+
+# Print all files and directories that doesn't have pattern in path.
+find /opt/angelos -type d | grep -v "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" > directories.txt
+find /opt/angelos -type f | grep -v "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" > files.txt
+
+# Remove all files and directories that has pattern in path.
+find /opt/angelos -type f | grep "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" | xargs -I'{}' rm '{}'
+find /opt/angelos -type d | grep "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" | xargs -I'{}' rm -fR '{}'
