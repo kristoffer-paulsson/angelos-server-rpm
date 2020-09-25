@@ -31,15 +31,49 @@ Vagrant.configure("2") do |config|
     mkdir rpmbuild/RPMS/ -p
     mkdir rpmbuild/SOURCES/ -p
     mkdir rpmbuild/SPECS/ -p
-    cp data/angelos.spec rpmbuild/SPECS/angelos.spec
+    # cp data/angelos.spec rpmbuild/SPECS/angelos.spec
 
     python3 -m virtualenv venv -p /usr/bin/python3
     source venv/bin/activate
 
-    cd rpmbuild/SPECS/
-    rpmbuild --target x86_64 -bb angelos.spec | tee build.log  # >build.log 2>&1
+    if cd angelos > /dev/null 2&>1
+    then
+      git pull
+    else
+      git clone https://github.com/kristoffer-paulsson/angelos.git angelos
+      cd angelos
+    fi
+
+    if [ -s "/home/vagrant/data/libsodium-1.0.18.tar.gz" ]
+    then
+      ln -sf /home/vagrant/data/libsodium-1.0.18.tar.gz ./angelos-bin/tarball/libsodium-1.0.18.tar.gz
+    fi
+
+    if [ -s "/home/vagrant/data/Python-3.8.5.tgz" ]
+    then
+      ln -sf /home/vagrant/data/Python-3.8.5.tgz ./angelos-server/tarball/Python-3.8.5.tgz
+    fi
+
+    pip install pip --upgrade
+    pip install setuptools --upgrade
+    pip install wheel --upgrade
+    pip install -r requirements.txt
+    pip install -e .
+
+    sudo mkdir /opt/angelos -p
+    sudo chown vagrant:vagrant /opt/angelos
+    python setup.py venv --prefix=/opt/angelos --step=1-9
+
+    find /opt/angelos -type f | grep "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" | xargs -I'{}' rm '{}'
+    find /opt/angelos -type d | grep "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" | xargs -I'{}' rm -fR '{}'
+
+    angelos-meta/bin/angelos-rpm-spec -r=0 > ../rpmbuild/SPECS/angelos.spec
+    cp ../rpmbuild/SPECS/angelos.spec /home/vagrant/data
+
+    cd ../rpmbuild/SPECS/
+    rpmbuild --target x86_64 -bb angelos.spec 2>&1 | tee -a build.log
     mv build.log /home/vagrant/data
-    mv rpmbuild/RPMS/x86_64/*.rpm /home/vagrant/data
+    mv ../../rpmbuild/RPMS/x86_64/*.rpm /home/vagrant/data
 
     deactivate
   SHELL

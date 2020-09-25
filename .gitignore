@@ -4,3 +4,4 @@
 /data/*.gz
 /data/*.tgz
 /data/*.rpm
+/data/*.spec
