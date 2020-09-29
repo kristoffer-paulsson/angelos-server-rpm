@@ -1,6 +1,6 @@
 /.vagrant/
 /data/*.txt
-/data/*.log
+*.log
 /data/*.gz
 /data/*.tgz
 /data/*.rpm

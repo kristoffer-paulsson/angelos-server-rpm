@@ -28,10 +28,9 @@ Vagrant.configure("2") do |config|
 
     mkdir rpmbuild/BUILD/ -p
     mkdir rpmbuild/BUILDROOT/ -p
-    mkdir rpmbuild/RPMS/ -p
+    mkdir rpmbuild/RPMS/x86_64/ -p
     mkdir rpmbuild/SOURCES/ -p
     mkdir rpmbuild/SPECS/ -p
-    # cp data/angelos.spec rpmbuild/SPECS/angelos.spec
 
     python3 -m virtualenv venv -p /usr/bin/python3
     source venv/bin/activate
@@ -62,18 +61,24 @@ Vagrant.configure("2") do |config|
 
     sudo mkdir /opt/angelos -p
     sudo chown vagrant:vagrant /opt/angelos
-    python setup.py venv --prefix=/opt/angelos --step=1-9
+    python setup.py venv --prefix=/opt/angelos
 
-    find /opt/angelos -type f | grep "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" | xargs -I'{}' rm '{}'
-    find /opt/angelos -type d | grep "/test/\|/tests/\|/unittest/\|/test_\|/distutils/\|/angelos/meta/\|/tkinter/\|/turtledemo/\|/idlelib/\|/ensurepip/\|/lib2to3/\|/venv/" | xargs -I'{}' rm -fR '{}'
+    chmod +x angelos-meta/bin/angelos-filter-files
+    chmod +x angelos-meta/bin/angelos-rpm-spec
+    chmod +x angelos-meta/bin/angelos-render-file
 
-    angelos-meta/bin/angelos-rpm-spec -r=0 > ../rpmbuild/SPECS/angelos.spec
+    angelos-meta/bin/angelos-filter-files
+    angelos-meta/bin/angelos-rpm-spec -r=0 -f=no > ../rpmbuild/SPECS/angelos.spec
+    angelos-meta/bin/angelos-render-file -r=service > ../rpmbuild/SOURCES/angelos.service
+    angelos-meta/bin/angelos-render-file -r=env > ../rpmbuild/SOURCES/env.json
+    angelos-meta/bin/angelos-render-file -r=config > ../rpmbuild/SOURCES/config.json
+    angelos-meta/bin/angelos-render-file -r=admins > ../rpmbuild/SOURCES/admins.pub
     cp ../rpmbuild/SPECS/angelos.spec /home/vagrant/data
 
     cd ../rpmbuild/SPECS/
     rpmbuild --target x86_64 -bb angelos.spec 2>&1 | tee -a build.log
     mv build.log /home/vagrant/data
-    mv ../../rpmbuild/RPMS/x86_64/*.rpm /home/vagrant/data
+    mv ../RPMS/x86_64/*.rpm /home/vagrant/data
 
     deactivate
   SHELL
