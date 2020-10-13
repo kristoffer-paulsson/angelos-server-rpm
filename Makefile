@@ -21,3 +21,6 @@ clean:
 	rm -fr ./data/*.log
 	rm -fr ./data/*.rpm
 	rm -fr ./*.log
+
+ssh:
+	vagrant up && vagrant ssh
